@@ -2,15 +2,17 @@ package com.kolotree.command.common
 
 import com.kolotree.common.eventing.Event
 
-trait AggregateRoot extends Identifiable {
+trait AggregateRoot[T <: AggregateRoot[T]] extends Identifiable {
 
   def uncommittedEvents: List[Event]
 
-  def version: Int = -1
+  def version: Int
 
-  protected def incrementVersion: this.type
+  private[common] def incrementVersion(): T = incrementVersionInternal()
 
-  protected def applyInternal(event: Event): this.type
+  protected def incrementVersionInternal(): T
+
+  protected def applyInternal(event: Event): T
 
   def getPreviousVersion: Int =
     version - uncommittedEvents.size
