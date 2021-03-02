@@ -10,7 +10,14 @@ lazy val root = (project in file("."))
     name := "es-playground"
   )
   .aggregate(
+    common,
     commandCommon
+  )
+
+lazy val common = project
+  .in(new File("./common"))
+  .settings(
+    name := "common"
   )
 
 lazy val commandCommon = project
@@ -20,5 +27,6 @@ lazy val commandCommon = project
     libraryDependencies += catsCore,
     libraryDependencies += scalaTest
   )
+  .dependsOn(common)
 
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
