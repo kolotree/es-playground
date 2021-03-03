@@ -13,10 +13,7 @@ trait AggregateReconstruct[T <: AggregateRoot[T]] {
     applyEvent(events.head).loadFromHistory(events.tail)
 }
 
-trait AggregateRoot[T <: AggregateRoot[T]]
-    extends Identifiable
-    with AggregateReconstruct[T]
-    with EventApplier[T] {
+trait AggregateRoot[T <: AggregateRoot[T]] extends Identifiable with AggregateReconstruct[T] with EventApplier[T] {
   self: T =>
 
   def uncommittedEvents: List[Event]
@@ -25,10 +22,12 @@ trait AggregateRoot[T <: AggregateRoot[T]]
 
   protected def incrementVersion(): T
 
+  protected def applyEventInternal(event: Event): T
+
   override def loadFromHistory(events: List[Event]): T =
     events
       .foldRight(this) { (event, root) =>
-        root.applyEvent(event).incrementVersion()
+        root.applyEventInternal(event).incrementVersion()
       }
       .markEventsAsCommitted()
 
