@@ -3,14 +3,13 @@ package com.kolotree.command.common
 import com.kolotree.common.eventing.Event
 
 trait AggregateRoot[T <: AggregateRoot[T]] extends Identifiable {
+  self: T =>
 
   def uncommittedEvents: List[Event]
 
   def version: Int
 
-  private[common] def incrementVersion(): T = incrementVersionInternal()
-
-  protected def incrementVersionInternal(): T
+  protected def incrementVersion(): T
 
   protected def applyInternal(event: Event): T
 
