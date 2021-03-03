@@ -3,12 +3,14 @@ package com.kolotree.command.common
 import com.kolotree.common.eventing.Event
 
 trait EventApplier[T <: AggregateRoot[T]] {
-  def applyEvent(event: Event): T
+  protected def applyEvent(event: Event): T
 }
 
-trait AggregateReconstruct[T <: AggregateRoot[T]] { self: EventApplier[T] =>
-  def load(events: List[Event]): T =
-    applyEvent(events.head).load(events.tail)
+trait AggregateReconstruct[T <: AggregateRoot[T]] {
+  self: EventApplier[T] =>
+
+  def loadFromHistory(events: List[Event]): T =
+    applyEvent(events.head).loadFromHistory(events.tail)
 }
 
 trait AggregateRoot[T <: AggregateRoot[T]]
@@ -21,15 +23,16 @@ trait AggregateRoot[T <: AggregateRoot[T]]
 
   def version: Int
 
-  protected def initialize(id: String): T
-
   protected def incrementVersion(): T
 
-  //TODO: Add events list clear after loading from store
-  override def load(events: List[Event]): T =
-    events.foldRight(this)((event, root) =>
-      root.applyEvent(event).incrementVersion()
-    )
+  override def loadFromHistory(events: List[Event]): T =
+    events
+      .foldRight(this) { (event, root) =>
+        root.applyEvent(event).incrementVersion()
+      }
+      .markEventsAsCommitted()
+
+  protected def markEventsAsCommitted(): T
 
   def getPreviousVersion: Int =
     version - uncommittedEvents.size
@@ -39,5 +42,5 @@ trait AggregateRoot[T <: AggregateRoot[T]]
 }
 
 object AggregateRoot {
-  val INITIAL_VERSION: Int = -1
+  val INITIAL_VERSION: Int = 0
 }
