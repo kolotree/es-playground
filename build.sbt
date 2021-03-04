@@ -43,7 +43,10 @@ lazy val commandPorts = project
 lazy val eventStoreDbAdapter = project
   .in(new File("./command-side/adapters/event-store-db-adapter"))
   .settings(
-    name := "event-store-db-adapter"
+    name := "event-store-db-adapter",
+    libraryDependencies += eventStoreDbClientJava,
+    libraryDependencies += monix,
+    libraryDependencies += json4s
   )
   .dependsOn(commandCommon, commandPorts)
 
