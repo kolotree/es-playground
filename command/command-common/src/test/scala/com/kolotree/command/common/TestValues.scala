@@ -21,10 +21,6 @@ object TestValues {
     override protected def incrementVersion(): Person =
       copy(version = version + 1)
 
-    override protected def applyEvent(event: Event): Person = {
-      applyEventInternal(event).incrementVersion()
-    }
-
     override protected def markEventsAsCommitted(): Person =
       copy(uncommittedEvents = List.empty[Event])
 

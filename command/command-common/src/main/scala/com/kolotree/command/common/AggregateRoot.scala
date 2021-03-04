@@ -24,6 +24,9 @@ trait AggregateRoot[T <: AggregateRoot[T]] extends Identifiable with AggregateRe
 
   protected def applyEventInternal(event: Event): T
 
+  override protected def applyEvent(event: Event): T =
+    applyEventInternal(event).incrementVersion()
+
   override def loadFromHistory(events: List[Event]): T =
     events
       .foldRight(this) { (event, root) =>
