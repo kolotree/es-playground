@@ -13,7 +13,8 @@ lazy val root = (project in file("."))
   .aggregate(
     common,
     commandCommon,
-    commandPorts
+    commandPorts,
+    eventStoreDbAdapter
   )
 
 lazy val common = project
@@ -38,5 +39,12 @@ lazy val commandPorts = project
     libraryDependencies += catsCore
   )
   .dependsOn(commandCommon)
+
+lazy val eventStoreDbAdapter = project
+  .in(new File("./command-side/adapters/event-store-db-adapter"))
+  .settings(
+    name := "event-store-db-adapter"
+  )
+  .dependsOn(commandCommon, commandPorts)
 
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
