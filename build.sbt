@@ -1,4 +1,5 @@
 import Dependencies._
+import sbt.Keys.libraryDependencies
 
 ThisBuild / scalaVersion := "2.13.4"
 ThisBuild / version := "0.1.0-SNAPSHOT"
@@ -33,7 +34,8 @@ lazy val commandCommon = project
 lazy val commandPorts = project
   .in(new File("./command-side/command-ports"))
   .settings(
-    name := "command-ports"
+    name := "command-ports",
+    libraryDependencies += catsCore
   )
   .dependsOn(commandCommon)
 
