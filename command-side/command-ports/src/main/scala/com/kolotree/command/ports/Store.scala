@@ -6,14 +6,15 @@ import com.kolotree.command.common.AggregateRoot
 import com.kolotree.command.common.validation.BaseError
 import com.kolotree.common.eventing.Event
 
+//TODO: Store methods should return aggregate without uncommitted events, instead of unit
 trait Store[F[_], T <: AggregateRoot[T]] {
 
-  def insert(newAggregate: T): F[T]
+  def insert(newAggregate: T): F[Unit]
 
-  def borrow(id: String, transformer: T => Either[BaseError, T])(implicit F: Monad[F]): F[T] =
+  def borrow(id: String, transformer: T => Either[BaseError, T])(implicit F: Monad[F]): F[Unit] =
     borrowAsync(id, aggregate => F.pure(transformer(aggregate)))
 
-  def borrowAsync(id: String, transformer: T => F[Either[BaseError, T]]): F[T]
+  def borrowAsync(id: String, transformer: T => F[Either[BaseError, T]]): F[Unit]
 }
 
 trait EventAppender[F[_]] {
@@ -23,7 +24,7 @@ trait EventAppender[F[_]] {
   protected def readAllEventsFor(id: String): F[List[Event]]
 }
 
-trait EventStore[F[_], T <: AggregateRoot[T]] {
+trait EventStore[F[_], T <: AggregateRoot[T]] extends Store[F, T] {
   self: EventAppender[F] =>
 
   protected def reconstruct: List[Event] => T

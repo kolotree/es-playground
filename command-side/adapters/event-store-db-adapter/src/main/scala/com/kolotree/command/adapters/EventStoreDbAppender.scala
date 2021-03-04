@@ -10,7 +10,7 @@ import eventstore.{EventNumber, ReadStreamEvents, WriteEvents, WrongExpectedVers
 import monix.eval.Task
 
 trait EventStoreDbAppender extends EventAppender[Task] {
-  protected val storeName: String
+  protected def storeName: String
 
   protected def esConnection: EsConnection
 
