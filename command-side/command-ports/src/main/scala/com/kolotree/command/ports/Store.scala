@@ -1,6 +1,6 @@
 package com.kolotree.command.ports
 
-import cats.{Monad, MonadError}
+import cats.MonadError
 import cats.data.EitherT
 import com.kolotree.command.common.AggregateRoot
 import com.kolotree.command.common.validation.{AggregateAlreadyInStoreException, AggregateVersionMismatch, BaseError}
@@ -12,10 +12,10 @@ trait Store[F[_], T <: AggregateRoot[T]] {
 
   def insert(newAggregate: T)(implicit F: MonadError[F, Throwable]): F[Unit]
 
-  def borrow(id: String, transformer: T => Either[BaseError, T])(implicit F: Monad[F]): F[Unit] =
+  def borrow(id: String, transformer: T => Either[BaseError, T])(implicit F: MonadError[F, Throwable]): F[Unit] =
     borrowAsync(id, aggregate => F.pure(transformer(aggregate)))
 
-  def borrowAsync(id: String, transformer: T => F[Either[BaseError, T]]): F[Unit]
+  def borrowAsync(id: String, transformer: T => F[Either[BaseError, T]])(implicit F: MonadError[F, Throwable]): F[Unit]
 }
 
 trait EventAppender[F[_]] {
@@ -48,11 +48,11 @@ trait EventStore[F[_], T <: AggregateRoot[T]] extends Store[F, T] {
       )
   }
 
-  protected def saveUncommittedEvents(aggregateRoot: T)(implicit F: Monad[F]): F[Unit] =
+  protected def saveUncommittedEvents(aggregateRoot: T)(implicit F: MonadError[F, Throwable]): F[Unit] =
     if (aggregateRoot.uncommittedEvents.isEmpty) F.pure(())
     else append(aggregateRoot.id, aggregateRoot.uncommittedEvents, aggregateRoot.getPreviousVersion)
 
-  def borrowAsync(id: String, transformer: T => F[Either[BaseError, T]])(implicit F: MonadError[F, Throwable]): F[Unit] =
+  override def borrowAsync(id: String, transformer: T => F[Either[BaseError, T]])(implicit F: MonadError[F, Throwable]): F[Unit] =
     borrowInternal(id, transformer)
       .handleErrorWith { case _: AggregateVersionMismatch =>
         borrowInternal(id, transformer)
