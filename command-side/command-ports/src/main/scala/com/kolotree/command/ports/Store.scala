@@ -2,10 +2,10 @@ package com.kolotree.command.ports
 
 import cats.MonadError
 import cats.data.EitherT
+import cats.implicits._
 import com.kolotree.command.common.AggregateRoot
 import com.kolotree.command.common.validation.{AggregateAlreadyInStoreException, AggregateVersionMismatch, BaseError}
 import com.kolotree.common.eventing.Event
-import cats.implicits._
 
 //TODO: Store methods should return aggregate without uncommitted events, instead of unit
 trait Store[F[_], T <: AggregateRoot[T]] {
