@@ -30,13 +30,10 @@ trait EventStore[F[_], T <: AggregateRoot[T]] extends Store[F, T] {
 
   protected def reconstruct: List[Event] => T
 
-  protected def reconstructAggregate(events: List[Event]): T =
-    reconstruct(events)
-
   protected def borrowInternal(id: String, transformer: T => F[Either[BaseError, T]])(implicit F: MonadError[F, Throwable]): F[Unit] = {
     val transformationEither = for {
       events <- EitherT.liftF[F, BaseError, List[Event]](readAllEventsFor(id))
-      aggregate <- EitherT.pure[F, BaseError](reconstructAggregate(events))
+      aggregate <- EitherT.pure[F, BaseError](reconstruct(events))
       aggregateWithChanges <- EitherT(transformer(aggregate))
       _ <- EitherT.liftF[F, BaseError, Unit](saveUncommittedEvents(aggregateWithChanges))
     } yield ()

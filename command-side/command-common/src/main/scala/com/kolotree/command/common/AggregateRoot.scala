@@ -13,7 +13,7 @@ trait AggregateReconstruct[T <: AggregateRoot[T]] {
     applyEvent(events.head).loadFromHistory(events.tail)
 }
 
-trait AggregateRoot[T <: AggregateRoot[T]] extends Identifiable with AggregateReconstruct[T] with EventApplier[T] {
+trait AggregateRoot[T <: AggregateRoot[T]] extends Identifiable with EventApplier[T] with AggregateReconstruct[T] {
   self: T =>
 
   def uncommittedEvents: List[Event]
