@@ -3,12 +3,22 @@ import sbt.Keys.libraryDependencies
 
 ThisBuild / scalaVersion := "2.13.4"
 ThisBuild / version := "0.1.0-SNAPSHOT"
-ThisBuild / organization := "com.example"
-ThisBuild / organizationName := "example"
+ThisBuild / organization := "com.kolotree"
+ThisBuild / organizationName := "kolotree"
+
+def commonSettings(projectName: String): Seq[sbt.Def.Setting[_]] = Seq(
+  name := projectName,
+  scalacOptions := Seq(
+    "-unchecked",
+    "-deprecation",
+    "-feature",
+    "-Xfatal-warnings"
+  )
+)
 
 lazy val root = (project in file("."))
   .settings(
-    name := "es-playground"
+    commonSettings("es-playground")
   )
   .aggregate(
     common,
@@ -20,13 +30,13 @@ lazy val root = (project in file("."))
 lazy val common = project
   .in(new File("./common"))
   .settings(
-    name := "common"
+    commonSettings("common")
   )
 
 lazy val commandCommon = project
   .in(new File("./command-side/command-common"))
   .settings(
-    name := "command-common",
+    commonSettings("command-common"),
     libraryDependencies += catsCore,
     libraryDependencies += scalaTest
   )
@@ -35,7 +45,7 @@ lazy val commandCommon = project
 lazy val commandPorts = project
   .in(new File("./command-side/command-ports"))
   .settings(
-    name := "command-ports",
+    commonSettings("command-ports"),
     libraryDependencies += catsCore
   )
   .dependsOn(commandCommon)
@@ -43,7 +53,7 @@ lazy val commandPorts = project
 lazy val eventStoreDbAdapter = project
   .in(new File("./command-side/adapters/event-store-db-adapter"))
   .settings(
-    name := "event-store-db-adapter",
+    commonSettings("event-store-db-adapter"),
     libraryDependencies += eventStoreDbClientJava,
     libraryDependencies += monix,
     libraryDependencies += json4s

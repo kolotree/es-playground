@@ -55,7 +55,7 @@ trait EventStore[F[_], T <: AggregateRoot[T]] extends Store[F, T] {
         borrowInternal(id, transformer)
       }
 
-  def insert(newAggregate: T)(implicit F: MonadError[F, Throwable]): F[Unit] =
+  override def insert(newAggregate: T)(implicit F: MonadError[F, Throwable]): F[Unit] =
     append(
       newAggregate.id,
       newAggregate.uncommittedEvents,
